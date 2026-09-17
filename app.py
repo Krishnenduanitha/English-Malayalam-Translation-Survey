@@ -1453,8 +1453,8 @@ Please base your responses on your own perception of
 the audio. There are no right or wrong answers from
 the participant's perspective.
 
-Note: Only focus on the given emphasized word there might be 
-other emphasized words in the audio , just ignore those.
+Note: Only focus on the given emphasized word.
+There might be other emphasized words in the audio , just ignore those.
 
 </div>
 """,
