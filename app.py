@@ -221,7 +221,7 @@ def initialize_sheet():
         if not values:
 
             worksheet.update(
-                "A1:U1",
+                "A1:T1",
                 [HEADERS],
                 value_input_option="USER_ENTERED"
             )
@@ -237,7 +237,7 @@ def initialize_sheet():
         if existing_headers != HEADERS:
 
             worksheet.update(
-                "A1:U1",
+                "A1:T1",
                 [HEADERS],
                 value_input_option="USER_ENTERED"
             )
@@ -999,7 +999,7 @@ def save_response(
         if existing_row_number:
 
             worksheet.update(
-                f"A{existing_row_number}:U{existing_row_number}",
+                f"A{existing_row_number}:T{existing_row_number}",
                 [row_values],
                 value_input_option="USER_ENTERED"
             )
@@ -1089,13 +1089,13 @@ def save_remarks():
 
                 worksheet.update_cell(
                     row_number,
-                    20,
+                    19,
                     st.session_state.remarks
                 )
 
                 worksheet.update_cell(
                     row_number,
-                    21,
+                    20,
                     datetime.now().strftime(
                         "%Y-%m-%d %H:%M:%S"
                     )
