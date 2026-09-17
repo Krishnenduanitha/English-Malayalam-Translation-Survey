@@ -1439,6 +1439,7 @@ During the study, you will listen to English speech
 recordings, rate how strongly you perceive the emphasis,
 and then choose the Malayalam version that best reflects
 the intended meaning and emphasis of the original speech.
+
 """
     )
 
@@ -1451,6 +1452,9 @@ the intended meaning and emphasis of the original speech.
 Please base your responses on your own perception of
 the audio. There are no right or wrong answers from
 the participant's perspective.
+
+Note: Only focus on the given emphasized word there might be 
+other emphasized words in the audio , just ignore those.
 
 </div>
 """,
