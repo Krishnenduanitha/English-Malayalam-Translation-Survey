@@ -1760,75 +1760,7 @@ elif st.session_state.page == "participant_info":
 
 elif st.session_state.page == "instructions":
 
-    st.markdown(
-        '<div class="section-title">'
-        'Instructions'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
-    st.write(
-        "Please read the instructions carefully."
-    )
-
-    st.markdown(
-        """
-### What you need to do
-
-**1. Listen carefully to the English audio.**
-
-You may replay the recording as many times as necessary.
-
-**2. Pay attention to the emphasized word(s).**
-
-The English sentence displayed on the screen contains
-the word or words relevant to the emphasis being studied.
-
-Listen carefully to how strongly the speaker emphasizes
-these word(s).
-
-**3. Rate the perceived emphasis.**
-
-Before choosing a translation, rate how strongly you
-perceived the indicated word(s) to be emphasized in
-the English audio.
-
-**4. Choose one Malayalam version.**
-
-You will see three Malayalam versions of the sentence.
-
-They represent:
-
-- A Malayalam reference translation
-- A machine-generated translation
-- A version with the emphasis particle removed
-
-The labels identifying these versions will not be shown
-to you.
-
-Choose the version that best reflects the intended meaning
-and emphasis of the English speech.
-"""
-    )
-
-    st.markdown(
-        """
-### Important points
-
-- Listen carefully before answering.
-- You may replay the audio as many times as necessary.
-- Focus specifically on **emphasis** in the English speech.
-- Give your emphasis rating **before** selecting a
-  Malayalam version.
-- Consider the intended meaning of the emphasized word.
-- Base your answers on your own perception.
-- Do not judge the speaker based on voice, gender,
-  accent, speaking speed, or loudness.
-- There are no right or wrong answers from the
-  participant's perspective.
-"""
-    )
-
+    
     st.markdown(
         """
 ### Emphasis rating scale
