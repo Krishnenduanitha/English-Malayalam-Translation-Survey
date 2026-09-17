@@ -755,6 +755,10 @@ def get_randomized_options(
 
             "type":
                 "particles removed"
+        },
+        {
+        "text": "None of these",
+        "type": "none"
         }
     ]
 
