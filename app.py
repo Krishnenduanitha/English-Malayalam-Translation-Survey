@@ -2435,11 +2435,11 @@ about your experience below.
 You may comment on:
 
 - Clarity of the instructions
-- Audio quality
-- Difficulty in identifying emphasis
+- Understanding the question
+- Understanding translations
 - Malayalam translation quality
-- Ease of choosing between the three versions
-- Your perception of emphasis
+- Emphasis understanding
+- Difficulty of the task
 - Any technical issues
 - Anything else you would like to mention
 """
