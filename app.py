@@ -354,12 +354,14 @@ def load_participant_progress(
 
     answers = {}
     remarks = ""
+    demographics = {}
 
     if len(values) <= 1:
 
         return {
             "answers": answers,
             "remarks": remarks,
+            "demographics": {},
             "first_unanswered": 0
         }
 
@@ -381,6 +383,20 @@ def load_participant_progress(
 
         if existing_name != target:
             continue
+
+        # Preserve the participant's original metadata.
+        if not demographics:
+            demographics = {
+                "age_range": data["age_range"],
+                "native_language": data["native_language"],
+                "english_proficiency": data["english_proficiency"],
+                "malayalam_proficiency": data["malayalam_proficiency"],
+                "headphones": data["headphones"],
+                "hearing_difficulties": data["hearing_difficulties"],
+                "speech_experience": data["speech_experience"],
+                "prosody_understanding": data["prosody_understanding"],
+                "listening_test_experience": data["listening_test_experience"]
+            }
 
         question_number = (
             data["question_number"]
@@ -445,6 +461,7 @@ def load_participant_progress(
     return {
         "answers": answers,
         "remarks": remarks,
+        "demographics": demographics,
         "first_unanswered": first_unanswered
     }
 
@@ -1502,260 +1519,278 @@ elif st.session_state.page == "participant_info":
         placeholder="Enter your name"
     )
 
-    age_range = st.radio(
-        "Age range",
-        [
-            "Below 18",
-            "18–24",
-            "25–34",
-            "35–44",
-            "45–54",
-            "55 or above"
-        ],
-        index=None,
-        key="participant_age"
-    )
+    # ------------------------------------------------------------
+    # RESUME EXISTING PARTICIPANT
+    # ------------------------------------------------------------
+    # Existing participants do not re-enter demographic information.
+    # Their original metadata is restored from Google Sheets.
+    existing_participant = False
 
-    native_language = st.text_input(
-        "Native language(s)",
-        key="participant_native_language"
-    )
+    if participant_name.strip():
+        existing_participant = participant_exists(
+            participant_name.strip()
+        )
 
-    english_proficiency = st.radio(
-        "English proficiency",
-        [
-            "Beginner",
-            "Intermediate",
-            "Advanced",
-            "Native / Near-native"
-        ],
-        index=None,
-        key="participant_english"
-    )
+    if existing_participant:
 
-    malayalam_proficiency = st.radio(
-        "Malayalam proficiency",
-        [
-            "None",
-            "Beginner",
-            "Intermediate",
-            "Advanced",
-            "Native"
-        ],
-        index=None,
-        key="participant_malayalam"
-    )
+        st.info(
+            "This participant already has saved progress. "
+            "Your previously entered participant information "
+            "will be used. You do not need to enter it again."
+        )
 
-    headphones = st.radio(
-        "Are you using headphones or earphones?",
-        [
-            "Yes",
-            "No"
-        ],
-        index=None,
-        key="participant_headphones"
-    )
-
-    hearing_difficulties = st.radio(
-        "Do you have any difficulty hearing speech?",
-        [
-            "Yes",
-            "No",
-            "Prefer not to say"
-        ],
-        index=None,
-        key="participant_hearing"
-    )
-
-    speech_experience = st.radio(
-        "Do you have previous experience with "
-        "speech, linguistics, audio, or related research?",
-        [
-            "Yes",
-            "No"
-        ],
-        index=None,
-        key="participant_speech"
-    )
-
-    prosody_understanding = st.radio(
-        "How familiar are you with the concept of prosody?",
-        [
-            "Not familiar",
-            "Slightly familiar",
-            "Moderately familiar",
-            "Very familiar"
-        ],
-        index=None,
-        key="participant_prosody"
-    )
-
-    listening_test_experience = st.radio(
-        "Have you participated in a listening test before?",
-        [
-            "Yes",
-            "No"
-        ],
-        index=None,
-        key="participant_listening"
-    )
-
-    st.markdown("---")
-
-    if st.button(
-        "Continue →",
-        type="primary",
-        use_container_width=True
-    ):
-
-        if not participant_name.strip():
-
-            st.warning(
-                "Please enter your participant name."
-            )
-
-        elif not age_range:
-
-            st.warning(
-                "Please select your age range."
-            )
-
-        elif not native_language.strip():
-
-            st.warning(
-                "Please enter your native language."
-            )
-
-        elif not english_proficiency:
-
-            st.warning(
-                "Please select your English proficiency."
-            )
-
-        elif not malayalam_proficiency:
-
-            st.warning(
-                "Please select your Malayalam proficiency."
-            )
-
-        elif not headphones:
-
-            st.warning(
-                "Please answer the headphones question."
-            )
-
-        elif not hearing_difficulties:
-
-            st.warning(
-                "Please answer the hearing question."
-            )
-
-        elif not speech_experience:
-
-            st.warning(
-                "Please answer the speech experience question."
-            )
-
-        elif not prosody_understanding:
-
-            st.warning(
-                "Please select your familiarity with prosody."
-            )
-
-        elif not listening_test_experience:
-
-            st.warning(
-                "Please answer the listening-test question."
-            )
-
-        else:
+        if st.button(
+            "Resume Study →",
+            type="primary",
+            use_container_width=True
+        ):
 
             st.session_state.participant_name = (
                 participant_name.strip()
             )
 
-            st.session_state.demographics = {
-
-                "age_range":
-                    age_range,
-
-                "native_language":
-                    native_language.strip(),
-
-                "english_proficiency":
-                    english_proficiency,
-
-                "malayalam_proficiency":
-                    malayalam_proficiency,
-
-                "headphones":
-                    headphones,
-
-                "hearing_difficulties":
-                    hearing_difficulties,
-
-                "speech_experience":
-                    speech_experience,
-
-                "prosody_understanding":
-                    prosody_understanding,
-
-                "listening_test_experience":
-                    listening_test_experience
-            }
-
-            # ------------------------------------------------
-            # LOAD EXISTING PROGRESS
-            # ------------------------------------------------
-
-            progress = (
-                load_participant_progress(
-                    st.session_state
-                    .participant_name
-                )
+            progress = load_participant_progress(
+                st.session_state.participant_name
             )
 
-            if participant_exists(
-                st.session_state
-                .participant_name
+            st.session_state.demographics = (
+                progress["demographics"]
+            )
+
+            st.session_state.answers = (
+                progress["answers"]
+            )
+
+            st.session_state.remarks = (
+                progress["remarks"]
+            )
+
+            st.session_state.current_question = (
+                progress["first_unanswered"]
+            )
+
+            if (
+                st.session_state.current_question
+                >= len(questions_df)
             ):
 
-                st.session_state.answers = (
-                    progress["answers"]
-                )
-
-                st.session_state.remarks = (
-                    progress["remarks"]
-                )
-
-                st.session_state.current_question = (
-                    progress["first_unanswered"]
-                )
-
-                if (
-                    st.session_state.current_question
-                    >= len(questions_df)
-                ):
-
-                    st.session_state.page = (
-                        "completed"
-                    )
-
-                else:
-
-                    st.session_state.page = (
-                        "instructions"
-                    )
+                st.session_state.page = "completed"
 
             else:
 
-                st.session_state.current_question = 0
-
-                st.session_state.page = (
-                    "instructions"
-                )
+                st.session_state.page = "instructions"
 
             st.rerun()
+
+    else:
+
+        age_range = st.radio(
+            "Age range",
+            [
+                "Below 18",
+                "18–24",
+                "25–34",
+                "35–44",
+                "45–54",
+                "55 or above"
+            ],
+            index=None,
+            key="participant_age"
+        )
+
+        native_language = st.text_input(
+            "Native language(s)",
+            key="participant_native_language"
+        )
+
+        english_proficiency = st.radio(
+            "English proficiency",
+            [
+                "Beginner",
+                "Intermediate",
+                "Advanced",
+                "Native / Near-native"
+            ],
+            index=None,
+            key="participant_english"
+        )
+
+        malayalam_proficiency = st.radio(
+            "Malayalam proficiency",
+            [
+                "None",
+                "Beginner",
+                "Intermediate",
+                "Advanced",
+                "Native"
+            ],
+            index=None,
+            key="participant_malayalam"
+        )
+
+        headphones = st.radio(
+            "Are you using headphones or earphones?",
+            [
+                "Yes",
+                "No"
+            ],
+            index=None,
+            key="participant_headphones"
+        )
+
+        hearing_difficulties = st.radio(
+            "Do you have any difficulty hearing speech?",
+            [
+                "Yes",
+                "No",
+                "Prefer not to say"
+            ],
+            index=None,
+            key="participant_hearing"
+        )
+
+        speech_experience = st.radio(
+            "Do you have previous experience with "
+            "speech, linguistics, audio, or related research?",
+            [
+                "Yes",
+                "No"
+            ],
+            index=None,
+            key="participant_speech"
+        )
+
+        prosody_understanding = st.radio(
+            "How familiar are you with the concept of prosody?",
+            [
+                "Not familiar",
+                "Slightly familiar",
+                "Moderately familiar",
+                "Very familiar"
+            ],
+            index=None,
+            key="participant_prosody"
+        )
+
+        listening_test_experience = st.radio(
+            "Have you participated in a listening test before?",
+            [
+                "Yes",
+                "No"
+            ],
+            index=None,
+            key="participant_listening"
+        )
+
+        st.markdown("---")
+
+        if st.button(
+            "Continue →",
+            type="primary",
+            use_container_width=True
+        ):
+
+            if not participant_name.strip():
+
+                st.warning(
+                    "Please enter your participant name."
+                )
+
+            elif not age_range:
+
+                st.warning(
+                    "Please select your age range."
+                )
+
+            elif not native_language.strip():
+
+                st.warning(
+                    "Please enter your native language."
+                )
+
+            elif not english_proficiency:
+
+                st.warning(
+                    "Please select your English proficiency."
+                )
+
+            elif not malayalam_proficiency:
+
+                st.warning(
+                    "Please select your Malayalam proficiency."
+                )
+
+            elif not headphones:
+
+                st.warning(
+                    "Please answer the headphones question."
+                )
+
+            elif not hearing_difficulties:
+
+                st.warning(
+                    "Please answer the hearing question."
+                )
+
+            elif not speech_experience:
+
+                st.warning(
+                    "Please answer the speech experience question."
+                )
+
+            elif not prosody_understanding:
+
+                st.warning(
+                    "Please select your familiarity with prosody."
+                )
+
+            elif not listening_test_experience:
+
+                st.warning(
+                    "Please answer the listening-test question."
+                )
+
+            else:
+
+                st.session_state.participant_name = (
+                    participant_name.strip()
+                )
+
+                st.session_state.demographics = {
+
+                    "age_range":
+                        age_range,
+
+                    "native_language":
+                        native_language.strip(),
+
+                    "english_proficiency":
+                        english_proficiency,
+
+                    "malayalam_proficiency":
+                        malayalam_proficiency,
+
+                    "headphones":
+                        headphones,
+
+                    "hearing_difficulties":
+                        hearing_difficulties,
+
+                    "speech_experience":
+                        speech_experience,
+
+                    "prosody_understanding":
+                        prosody_understanding,
+
+                    "listening_test_experience":
+                        listening_test_experience
+                }
+
+                st.session_state.current_question = 0
+
+                st.session_state.page = "instructions"
+
+                st.rerun()
 
 
 # ============================================================
