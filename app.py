@@ -217,7 +217,9 @@ def initialize_sheet():
 
         values = worksheet.get_all_values()
 
-        # Empty sheet
+        # The response table is always exactly A:T.
+        # Ignore any stale columns beyond T from older sheet versions.
+
         if not values:
 
             worksheet.update(
@@ -230,10 +232,9 @@ def initialize_sheet():
 
         existing_headers = [
             str(x).strip()
-            for x in values[0]
+            for x in values[0][:len(HEADERS)]
         ]
 
-        # Make header row exactly match our headers
         if existing_headers != HEADERS:
 
             worksheet.update(
@@ -951,10 +952,28 @@ def save_response(
         ]
 
         # ----------------------------------------------------
-        # READ SHEET SAFELY
+        # READ ONLY THE A:T RESPONSE TABLE
         # ----------------------------------------------------
 
         values = worksheet.get_all_values()
+
+        normalized_values = []
+
+        for existing_row in values:
+
+            row_values = list(
+                existing_row[:len(HEADERS)]
+            )
+
+            if len(row_values) < len(HEADERS):
+
+                row_values += [""] * (
+                    len(HEADERS) - len(row_values)
+                )
+
+            normalized_values.append(row_values)
+
+        values = normalized_values
 
         existing_row_number = None
 
@@ -1063,7 +1082,26 @@ def save_remarks():
 
     try:
 
+        # Read only the current A:T response table.
         values = worksheet.get_all_values()
+
+        normalized_values = []
+
+        for existing_row in values:
+
+            row_values = list(
+                existing_row[:len(HEADERS)]
+            )
+
+            if len(row_values) < len(HEADERS):
+
+                row_values += [""] * (
+                    len(HEADERS) - len(row_values)
+                )
+
+            normalized_values.append(row_values)
+
+        values = normalized_values
 
         participant_target = (
             st.session_state
@@ -1095,18 +1133,9 @@ def save_remarks():
                 participant_target
             ):
 
-                # T? No.
-                # With our 21-column HEADERS:
-                #
-                # S = remarks? Let's calculate:
-                #
-                # 19 = response_time_seconds
-                # 20 = remarks
-                # 21 = last_updated
-                #
-                # Therefore:
-                # T = remarks
-                # U = last_updated
+                # Current 20-column schema:
+                # S (19) = remarks
+                # T (20) = last_updated
 
                 worksheet.update_cell(
                     row_number,
