@@ -514,10 +514,30 @@ def load_questions():
     ]
 
     # --------------------------------------------------------
-    # Required columns
+    # The new Excel file uses these columns:
+    #
+    # Audio
+    # English Sentence
+    # Malayalam Sentence
+    # Unnamed: 3              -> particles-removed version
+    # Google Translate
+    # Marker
+    # English Word
+    # Malayalam Wrod
     # --------------------------------------------------------
 
+    # The fourth column is the Malayalam version with
+    # the prosodic marker/particle removed.
+    if "Unnamed: 3" in df.columns:
+        df = df.rename(
+            columns={
+                "Unnamed: 3": "Particles removed"
+            }
+        )
+
     required_columns = [
+
+        "Audio",
 
         "English Sentence",
 
@@ -527,9 +547,7 @@ def load_questions():
 
         "Particles removed",
 
-        "English Word",
-
-        "Audio filename"
+        "English Word"
     ]
 
     missing_columns = [
@@ -610,6 +628,7 @@ def load_questions():
     return df
 
 
+
 questions_df = load_questions()
 
 
@@ -618,28 +637,65 @@ questions_df = load_questions()
 # ============================================================
 
 def get_audio_path(
-    audio_filename
+    audio_source
 ):
 
-    audio_filename = str(
-        audio_filename
+    audio_source = str(
+        audio_source
     ).strip()
 
-    if not audio_filename:
-
+    if not audio_source:
         return None
 
     # --------------------------------------------------------
-    # Excel should contain only the filename.
-    #
-    # Example:
-    #
-    # 4xKgo0_HGRMThe_hidden_ways...wav
-    #
+    # New Excel file stores Google Drive sharing URLs.
+    # Convert a Google Drive file URL into a direct download
+    # URL that can be played by Streamlit.
+    # --------------------------------------------------------
+
+    if (
+        "drive.google.com" in audio_source
+        or "drive.usercontent.google.com" in audio_source
+    ):
+
+        import re
+
+        file_id = None
+
+        match = re.search(
+            r"/d/([a-zA-Z0-9_-]+)",
+            audio_source
+        )
+
+        if match:
+            file_id = match.group(1)
+
+        if not file_id:
+
+            match = re.search(
+                r"[?&]id=([a-zA-Z0-9_-]+)",
+                audio_source
+            )
+
+            if match:
+                file_id = match.group(1)
+
+        if file_id:
+
+            return (
+                "https://drive.google.com/uc"
+                "?export=download&id="
+                + file_id
+            )
+
+        return audio_source
+
+    # --------------------------------------------------------
+    # Also support a local audio filename/path.
     # --------------------------------------------------------
 
     filename = os.path.basename(
-        audio_filename
+        audio_source
     )
 
     audio_path = os.path.join(
@@ -654,7 +710,7 @@ def get_audio_path(
         return audio_path
 
     # --------------------------------------------------------
-    # Case-insensitive search
+    # Case-insensitive local search
     # --------------------------------------------------------
 
     if os.path.exists(
@@ -1915,7 +1971,7 @@ elif st.session_state.page == "experiment":
     ).strip()
 
     audio_filename = str(
-        row["Audio filename"]
+        row["Audio"]
     ).strip()
 
     # --------------------------------------------------------
@@ -1990,18 +2046,28 @@ elif st.session_state.page == "experiment":
 
         try:
 
-            with open(
-                audio_path,
-                "rb"
-            ) as audio_file:
+            # Local audio file
+            if os.path.isfile(audio_path):
 
-                audio_bytes = (
-                    audio_file.read()
+                with open(
+                    audio_path,
+                    "rb"
+                ) as audio_file:
+
+                    audio_bytes = (
+                        audio_file.read()
+                    )
+
+                st.audio(
+                    audio_bytes
                 )
 
-            st.audio(
-                audio_bytes
-            )
+            # Google Drive audio URL
+            else:
+
+                st.audio(
+                    audio_path
+                )
 
         except Exception as e:
 
@@ -2018,22 +2084,11 @@ elif st.session_state.page == "experiment":
         )
 
         st.write(
-            f"Expected filename:"
+            "Audio source:"
         )
 
         st.code(
             audio_filename
-        )
-
-        st.write(
-            "Expected location:"
-        )
-
-        st.code(
-            os.path.join(
-                AUDIO_DIR,
-                audio_filename
-            )
         )
 
     # ========================================================
