@@ -36,7 +36,7 @@ BASE_DIR = os.path.dirname(
 
 EXCEL_FILE = os.path.join(
     BASE_DIR,
-    "_25 sentences new.xlsx"
+    "mal 25 final.xlsx"
 )
 
 AUDIO_DIR = os.path.join(
