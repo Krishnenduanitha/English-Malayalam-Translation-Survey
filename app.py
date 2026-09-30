@@ -710,7 +710,7 @@ def get_audio_path(
         return audio_path
 
     # --------------------------------------------------------
-    # Case-insensitive local search
+    # Case-insensitive local search inside the audio folder
     # --------------------------------------------------------
 
     if os.path.exists(
@@ -731,6 +731,35 @@ def get_audio_path(
                         root,
                         file
                     )
+
+    # --------------------------------------------------------
+    # The new Excel file may contain paths such as:
+    # DATA/fleurs_en_test_1957.wav
+    # If the audio is stored elsewhere inside the project,
+    # search the complete project folder by filename.
+    # --------------------------------------------------------
+
+    target = filename.lower()
+
+    for root, dirs, files in os.walk(
+        BASE_DIR
+    ):
+
+        # Do not search inside the .git directory.
+        dirs[:] = [
+            directory
+            for directory in dirs
+            if directory != ".git"
+        ]
+
+        for file in files:
+
+            if file.lower() == target:
+
+                return os.path.join(
+                    root,
+                    file
+                )
 
     return None
 
